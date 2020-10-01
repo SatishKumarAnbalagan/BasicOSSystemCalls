@@ -1,0 +1,12 @@
+# Object files
+*.o
+
+# Executables
+part-1
+part-2
+part-3
+wait
+hello
+ugrep
+process1
+process2
