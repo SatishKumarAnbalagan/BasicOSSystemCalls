@@ -10,12 +10,15 @@
 #define STDIN_FILE_DESCRIPTOR_NUMBER 0    // standard value for input file descriptor 
 #define STDOUT_FILE_DESCRIPTOR_NUMBER 1    // standard value for output file descriptor 
 #define STDERROR_FILE_DESCRIPTOR_NUMBER 2    // standard value for error file descriptor 
+#define MAX_BUFFER_SIZE 200    // maximum size to do read and write
 
 /* write these functions */
 
 int read(int fd, void *ptr, int len);
 int write(int fd, void *ptr, int len);
 void exit(int err);
+void readline(char *pInput);
+void print(void *pInput);
 
 /* read one line from stdin (file descriptor 0) into a buffer: */
 void readline(char *pInput)
@@ -61,9 +64,28 @@ void exit(int err)
 
 void main(void)
 {
-    char input[200] = {0};
+    char input[MAX_BUFFER_SIZE] = {0};
     char *pInput = &input[0];
-    readline(pInput);
-    print(pInput);
+    char quit[6] = {'q', 'u', 'i', 't', '\n', '\0'};
+    char *pQuit = &quit[0];
+
+    while(1) {
+        print("> ");
+        readline(pInput);
+        int count = 0;
+        int match = 1;
+        while(count < 6) {
+            if(*(pInput+count) != *(pQuit+count)) {
+                match = 0;
+                break;
+            }
+            count++;
+        }
+        if(match)
+            break;
+
+        print("you typed: ");
+        print(pInput);
+    }
     exit(0);
 }
