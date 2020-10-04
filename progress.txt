@@ -1,0 +1,4 @@
+1) Check/Look up into using the syscall functions in the main files.
+2) Initial design of functions - read, write, exit.
+3) Factoring out generic readline and print functions.
+
