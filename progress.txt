@@ -2,4 +2,6 @@
 2) Initial design of functions - read, write, exit.
 3) Factoring out generic readline and print functions.
 4) Implemented read, write, exit, readline and print functions.
+5) Added quit logic for user input.
+
 
