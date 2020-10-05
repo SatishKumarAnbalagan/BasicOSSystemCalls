@@ -1,6 +1,9 @@
 # Object files
 *.o
 
+# Test outfiles
+.out
+
 # Executables
 part-1
 part-2
