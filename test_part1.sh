@@ -1,5 +1,8 @@
 #!/bin/bash
 
+make clean
+make part-1
+
 TEST_STDIN_FILE="testStdIn.out"
 TEST_STDOUT_FILE="testStdOut.out"
 NEW_LINE="\n"
