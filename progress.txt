@@ -3,8 +3,8 @@
 3) Part 1 - Factoring out generic readline and print functions.
 4) Part 1 - Implemented read, write, exit, readline and print functions.
 5) Part 1 - Added quit logic for user input.
-6) Part 1 - Updated error, exit codes
-7) Part 1 - code commenting
-8) Part 1 - code error checks and clean up 
-
-
+6) Part 1 - Updated error, exit codes.
+7) Part 1 - code commenting.
+8) Part 1 - code error checks and clean up. 
+9) Part 1 - changes in read & readlines function design.
+10) Part 1 - changes in write & print function design.
