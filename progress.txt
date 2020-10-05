@@ -7,3 +7,4 @@
 7) Part 1 - code commenting.
 8) Part 1 - code error checks and clean up. 
 9) Part 1 - changes in read & readlines function design.
+10) Part 1 - changes in write & print function design.
