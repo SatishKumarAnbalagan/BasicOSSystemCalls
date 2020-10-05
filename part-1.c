@@ -177,7 +177,7 @@ void main(void)
 
             print("you typed: ");
             // print(pInput);
-            write(STDIN_FILE_DESCRIPTOR_NUMBER, pInput, MAX_BUFFER_SIZE);
+            write(STDOUT_FILE_DESCRIPTOR_NUMBER, pInput, MAX_BUFFER_SIZE);
         }
     }
     else {
