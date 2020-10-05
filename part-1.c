@@ -61,8 +61,10 @@ void exit(int err);
  * Function to read a complete line from stdin.
  * 
  * @param pInput: pointer to the buffer in char
+ * @param max_length: maximum length of the buffer in int
+ * @return length of the characters read in integer
  */
-void readline(char *pInput);
+int readline(char *pInput, int max_length);
 
 /*
  * Function to write a complete line to stdout.
@@ -73,28 +75,22 @@ void print(void *pInput);
 
 /* Function Definitions */
 
-void readline(char *pInput)
+int readline(char *pInput, int max_length)
 {
-    int i = 0;
-    unsigned int length = 0;
-    char c;
-
-    // Read input character one at a time until EOF and newline character is found with NULL termination.
-    do {
-        length += read(STDIN_FILE_DESCRIPTOR_NUMBER, &c, 1);
-        pInput[i++] = c;
-    } while (c != '\n' && c != EOF);
-    pInput[i] = '\0';  //NULL terminate
+    int ret = FUNCTION_FAILURE;
+    if (pInput != NULL) {
+        // Read input character one at a time until EOF and newline character is found with NULL termination.
+        ret = read(STDIN_FILE_DESCRIPTOR_NUMBER, pInput, max_length);
+    }
+    return ret;
 }
 
 void print(void *pInput)
 {
     unsigned int length = 0;
-    char *ptr;
-    char c;
+    char *ptr = (char*) pInput;
+    char c = *((char*) pInput);
     
-    ptr = (char*) pInput;
-    c = *((char*) pInput);
     // Read input characters until EOF and newline character is found.
     while (c != NULL) {
         length += write(STDOUT_FILE_DESCRIPTOR_NUMBER, &c, 1);
@@ -110,15 +106,17 @@ int read(int fd, void *ptr, int len)
     char c;
 
     // with length of 0 returns zero and has no other effects
-    if(! len) {
-        ret = 0;
+    if(len > 0) {
+        // Read input character one at a time until the given length.
+        do {
+            syscall(__NR_read, fd, &c, 1);
+            cPtr[readLength++] = c;
+            ret = readLength;
+        } while (c != '\n' && c != EOF && readLength < len);
+        cPtr[readLength] = '\0';    // NULL terminate
     }
-
-    // Read input character one at a time until the given length.
-    while (c != '\n' && c != EOF && readLength < len) {
-        syscall(__NR_read, fd, &c, 1);
-        cPtr[readLength++] = c;
-        ret = readLength;
+    else {
+        ret = 0;
     }
     return ret;
 }
@@ -145,7 +143,8 @@ void main(void)
     if(pInput != NULL) {    // NULL check, if in case malloc is used in future
         while(1) {
             print("> ");
-            readline(pInput);
+            readline(pInput, MAX_BUFFER_SIZE);
+            //read(STDIN_FILE_DESCRIPTOR_NUMBER, pInput, MAX_BUFFER_SIZE);
             int count = 0;
             int match = 1;
 
