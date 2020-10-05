@@ -79,7 +79,7 @@ void readline(char *pInput)
     unsigned int length = 0;
     char c;
 
-    // Read input character one at a time until EOF and newline character is found.
+    // Read input character one at a time until EOF and newline character is found with NULL termination.
     do {
         length += read(STDIN_FILE_DESCRIPTOR_NUMBER, &c, 1);
         pInput[i++] = c;
@@ -104,7 +104,23 @@ void print(void *pInput)
 
 int read(int fd, void *ptr, int len)
 {
-    return syscall(__NR_read, fd, ptr, len);
+    unsigned int ret = FUNCTION_FAILURE;
+    unsigned int readLength = 0;
+    char *cPtr = (char*) ptr;
+    char c;
+
+    // with length of 0 returns zero and has no other effects
+    if(! len) {
+        ret = 0;
+    }
+
+    // Read input character one at a time until the given length.
+    while (c != '\n' && c != EOF && readLength < len) {
+        syscall(__NR_read, fd, &c, 1);
+        cPtr[readLength++] = c;
+        ret = readLength;
+    }
+    return ret;
 }
 
 int write(int fd, void *ptr, int len)
