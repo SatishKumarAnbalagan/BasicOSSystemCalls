@@ -121,6 +121,12 @@ int open(char *path, int flags)
     return ret;
 }
 
+int close(int fd)
+{
+    int ret = FUNCTION_FAILURE;
+    return ret;    
+}
+
 /* simple function to split a line:
  *   char buffer[200];
  *   <read line into 'buffer'>
