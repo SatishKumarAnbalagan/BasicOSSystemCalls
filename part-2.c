@@ -115,6 +115,12 @@ void exit(int err)
     syscall(__NR_exit, err);
 }
 
+int open(char *path, int flags)
+{
+    int ret = FUNCTION_FAILURE;
+    return ret;
+}
+
 /* simple function to split a line:
  *   char buffer[200];
  *   <read line into 'buffer'>
