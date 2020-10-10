@@ -7,6 +7,24 @@
 #include "elf64.h"
 #include "sysdefs.h"
 
+/* Definitions */
+#define EOF (-1)    // standard value for end of file
+#define STDIN_FILE_DESCRIPTOR_NUMBER 0    // standard value for input file descriptor 
+#define STDOUT_FILE_DESCRIPTOR_NUMBER 1    // standard value for output file descriptor 
+#define STDERROR_FILE_DESCRIPTOR_NUMBER 2    // standard value for error file descriptor 
+#define MAX_BUFFER_SIZE 200    // maximum size to do read and write
+
+/* Error code definitions */
+#define ERROR_NULL_POINTER (-1000)
+
+/* Exit code definitions */
+#define EXIT_SUCCESS 0
+#define EXIT_FAILURE -1
+
+/* function exit code definitions */
+#define FUNCTION_SUCCESS (EXIT_SUCCESS)
+#define FUNCTION_FAILURE (EXIT_FAILURE)
+
 extern void *vector[];
 
 /* ---------- */
@@ -47,8 +65,55 @@ char *do_getarg(int i);
  */
 
 /* your code here */
+int read(int fd, void *ptr, int len)
+{
+    int ret = FUNCTION_FAILURE;
+    int readLength = 0;
+    char *cPtr = (char*) ptr;
+    char c;
 
-/* ---------- */
+    // with length of 0 returns zero and has no other effects
+    if(len > 0) {
+        // Read input character one at a time until the given length.
+        do {
+            syscall(__NR_read, fd, &c, 1);
+            cPtr[readLength++] = c;
+            ret = readLength;
+        } while (c != '\n' && c != EOF && readLength < len);
+        cPtr[readLength] = '\0';    // NULL terminate
+    }
+    else {
+        ret = 0;
+    }
+    return ret;
+}
+
+int write(int fd, void *ptr, int len)
+{
+    int ret = FUNCTION_FAILURE;
+    int writtenLength = 0;
+    char *cPtr = (char*) ptr;
+    char c = *(char*) ptr;
+    
+    // with length of 0 returns zero and has no other effects
+    if(len > 0) {
+        // Read input characters until EOF and newline character is found.
+        while (c != NULL && writtenLength < len) {
+            syscall(__NR_write, fd, &c, 1);
+            ret = ++writtenLength;
+            c = *(++cPtr);
+        }
+    }
+    else {
+        ret = 0;
+    }
+    return ret;
+}
+
+void exit(int err)
+{
+    syscall(__NR_exit, err);
+}
 
 /* simple function to split a line:
  *   char buffer[200];
