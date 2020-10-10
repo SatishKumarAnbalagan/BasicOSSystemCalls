@@ -127,6 +127,12 @@ int close(int fd)
     return ret;    
 }
 
+int lseek(int fd, int offset, int flag)
+{
+    int ret = FUNCTION_FAILURE;
+    return ret; 
+}
+
 /* simple function to split a line:
  *   char buffer[200];
  *   <read line into 'buffer'>
