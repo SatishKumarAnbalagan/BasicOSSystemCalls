@@ -133,6 +133,11 @@ int lseek(int fd, int offset, int flag)
     return ret; 
 }
 
+void *mmap(void *addr, int len, int prot, int flags, int fd, int offset)
+{
+    // gotta defn
+}
+
 /* simple function to split a line:
  *   char buffer[200];
  *   <read line into 'buffer'>
