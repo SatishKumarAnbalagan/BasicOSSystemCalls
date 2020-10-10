@@ -174,6 +174,14 @@ void do_print(char *buf)
     print((void *) buf);
 }
 
+char *do_getarg(int i)
+{
+    char* outArg;
+    // gotta defn
+
+    return outArg;
+}
+
 /* simple function to split a line:
  *   char buffer[200];
  *   <read line into 'buffer'>
