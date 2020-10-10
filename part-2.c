@@ -144,6 +144,21 @@ int munmap(void *addr, int len)
     return ret;
 }
 
+int readline(char *pInput, int len)
+{
+    int ret = FUNCTION_FAILURE;
+    if (pInput != NULL && len > 0) {
+        // Read input character one at a time until EOF and newline character is found with NULL termination.
+        ret = read(STDIN_FILE_DESCRIPTOR_NUMBER, pInput, len);
+    }
+    return ret;
+}
+
+void do_readline(char *buf, int len)
+{
+    readline(buf, len);
+}
+
 /* simple function to split a line:
  *   char buffer[200];
  *   <read line into 'buffer'>
