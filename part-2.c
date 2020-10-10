@@ -159,6 +159,21 @@ void do_readline(char *buf, int len)
     readline(buf, len);
 }
 
+int print(void *pInput)
+{
+    int ret = FUNCTION_FAILURE;
+    if (pInput != NULL) {
+        // Read input characters until EOF and newline character is found.
+        ret = write(STDOUT_FILE_DESCRIPTOR_NUMBER, pInput, MAX_BUFFER_SIZE);
+    }
+    return ret;
+}
+
+void do_print(char *buf)
+{
+    print((void *) buf);
+}
+
 /* simple function to split a line:
  *   char buffer[200];
  *   <read line into 'buffer'>
