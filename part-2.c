@@ -138,6 +138,12 @@ void *mmap(void *addr, int len, int prot, int flags, int fd, int offset)
     // gotta defn
 }
 
+int munmap(void *addr, int len)
+{
+    int ret = FUNCTION_FAILURE;
+    return ret;
+}
+
 /* simple function to split a line:
  *   char buffer[200];
  *   <read line into 'buffer'>
