@@ -271,8 +271,6 @@ int split(char **argv, int max_argc, char *line)
     return i;
 }
 
-/* ---------- */
-
 void main(void)
 {
     vector[0] = do_readline;
