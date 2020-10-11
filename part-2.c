@@ -174,7 +174,20 @@ int lseek(int fd, int offset, int flag)
 
 void *mmap(void *addr, int len, int prot, int flags, int fd, int offset)
 {
-    // gotta defn
+    void* ret = FUNCTION_FAILURE;
+    if((len > 0) && FD_VALID_CHECK(fd))
+    {
+        ret = syscall(__NR_mmap, addr, len, prot, flags, fd, offset); 
+        if(ret == MAP_FAILED)
+        {
+            do_print("Mapping Failed\n");
+        }
+    }
+    else
+    {
+        do_print("mmap input error\n");
+    }
+    return ret;
 }
 
 int munmap(void *addr, int len)
