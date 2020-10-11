@@ -8,27 +8,31 @@
 #include "sysdefs.h"
 
 /* Definitions */
-#define EOF (-1)    // standard value for end of file
-#define STDIN_FILE_DESCRIPTOR_NUMBER 0    // standard value for input file descriptor 
-#define STDOUT_FILE_DESCRIPTOR_NUMBER 1    // standard value for output file descriptor 
-#define STDERROR_FILE_DESCRIPTOR_NUMBER 2    // standard value for error file descriptor 
-#define MAX_BUFFER_SIZE 200    // maximum size to do read and write
+#define EOF    (-1)    // standard value for end of file
+#define STDIN_FILE_DESCRIPTOR_NUMBER    0    // standard value for input file descriptor 
+#define STDOUT_FILE_DESCRIPTOR_NUMBER    1    // standard value for output file descriptor 
+#define STDERROR_FILE_DESCRIPTOR_NUMBER    2    // standard value for error file descriptor 
+#define MAX_BUFFER_SIZE    200    // maximum size to do read and write
 
 /* Open file mode flags definitions */
-#define O_RDONLY	00000000
-#define O_WRONLY	00000001
-#define O_RDWR		00000002
+#define O_RDONLY    00000000
+#define O_WRONLY    00000001
+#define O_RDWR      00000002
 
 /* Error code definitions */
-#define ERROR_NULL_POINTER (-1000)
+#define ERROR_NULL_POINTER    (-1000)
 
 /* Exit code definitions */
-#define EXIT_SUCCESS 0
-#define EXIT_FAILURE -1
+#define EXIT_SUCCESS    0
+#define EXIT_FAILURE    -1
 
 /* function exit code definitions */
-#define FUNCTION_SUCCESS (EXIT_SUCCESS)
-#define FUNCTION_FAILURE (EXIT_FAILURE)
+#define FUNCTION_SUCCESS    (EXIT_SUCCESS)
+#define FUNCTION_FAILURE    (EXIT_FAILURE)
+
+#define FD_SOFTLIMIT    1024
+#define FD_HARDLIMIT    65535
+#define FD_VALID_CHECK(fd)    ((fd > STDERROR_FILE_DESCRIPTOR_NUMBER) && (fd <= FD_SOFTLIMIT))
 
 extern void *vector[];
 
@@ -127,13 +131,18 @@ int open(char *path, int flags)
     {
         ret = syscall(__NR_open, flags);
     }
-    return ret;
+    // checks fd validity & returns file descriptor
+    return FD_VALID_CHECK(ret) ? ret : FUNCTION_FAILURE;
 }
 
 int close(int fd)
 {
     int ret = FUNCTION_FAILURE;
-    return ret;    
+    if(FD_VALID_CHECK(fd))
+    {
+        ret = syscall(__NR_close, fd);
+    }
+    return ret;
 }
 
 int lseek(int fd, int offset, int flag)
