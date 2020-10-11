@@ -13,6 +13,7 @@
 #define STDOUT_FILE_DESCRIPTOR_NUMBER    1    // standard value for output file descriptor 
 #define STDERROR_FILE_DESCRIPTOR_NUMBER    2    // standard value for error file descriptor 
 #define MAX_BUFFER_SIZE    200    // maximum size to do read and write
+#define MAX_ARGUMENTS    10    // max number of input arguments 
 
 /* Open file mode flags definitions */
 #ifndef O_RDONLY
@@ -38,6 +39,7 @@
 
 /* Error code definitions */
 #define ERROR_NULL_POINTER    (-1000)
+#define ERROR_INVALID_INDEX    (-1001)
 
 /* Exit code definitions */
 #define EXIT_SUCCESS    0
@@ -51,9 +53,16 @@
 #define FD_HARDLIMIT    65535
 #define FD_VALID_CHECK(fd)    ((fd > STDERROR_FILE_DESCRIPTOR_NUMBER) && (fd <= FD_SOFTLIMIT))
 
+/* round A up to the next multiple of B */
+#define ROUND_UP(a,b) (((a+b-1)/b)*b)
+
 extern void *vector[];
 
 /* ---------- */
+/* Global variables */
+char *argv[MAX_ARGUMENTS];
+int argc;
+
 
 /* write these functions 
  */
@@ -174,10 +183,10 @@ int lseek(int fd, int offset, int flag)
 
 void *mmap(void *addr, int len, int prot, int flags, int fd, int offset)
 {
-    void* ret = FUNCTION_FAILURE;
+    void* ret = (void*) FUNCTION_FAILURE;
     if((len > 0) && FD_VALID_CHECK(fd))
     {
-        ret = syscall(__NR_mmap, addr, len, prot, flags, fd, offset); 
+        ret = (void*) syscall(__NR_mmap, addr, len, prot, flags, fd, offset); 
         if(ret == MAP_FAILED)
         {
             do_print("Mapping Failed\n");
@@ -232,10 +241,10 @@ void do_print(char *buf)
 
 char *do_getarg(int i)
 {
-    char* outArg;
-    // gotta defn
-
-    return outArg;
+    if(i < argc)
+        return argv[i];
+    else
+        return NULL;         
 }
 
 /* simple function to split a line:
@@ -270,7 +279,54 @@ void main(void)
     vector[1] = do_print;
     vector[2] = do_getarg;
 
-    /* YOUR CODE HERE */
-    exit(0);
+    char input[MAX_BUFFER_SIZE] = {0};
+    char *pInput = &input[0];
+    char quit[5] = {'q', 'u', 'i', 't', '\n'};
+    char *pQuit = &quit[0];
+    int exit_code = EXIT_FAILURE;
+
+    if(pInput != NULL) {    // NULL check, if in case malloc is used in future
+        while(1) {
+            print("> ");
+            readline(pInput, MAX_BUFFER_SIZE);
+            int count = 0;
+            int match = 1;
+
+            while(*(pInput + count) != NULL) {
+                if(*(pInput + count) != *(pQuit + count)) {
+                    match = 0;
+                    break;
+                }
+                count++;
+            }
+
+            if(match) {
+                exit_code = EXIT_SUCCESS;
+                break;
+            }
+
+            argc = split(argv, MAX_ARGUMENTS, pInput);
+
+            print("you typed: ");
+
+            int index = 0;
+            while(index < argc)
+            {
+                char *arg = do_getarg(index);
+                if(arg == NULL) {
+                    print("Invalid get arguments index. Exitt !!!\n");
+                    exit(ERROR_INVALID_INDEX);
+                }
+                print(arg);
+                print("\n");
+                index++;
+            }
+        }
+    }
+    else {
+        exit_code = ERROR_NULL_POINTER;
+    }
+
+    exit(exit_code);
 }
 
