@@ -193,6 +193,10 @@ void *mmap(void *addr, int len, int prot, int flags, int fd, int offset)
 int munmap(void *addr, int len)
 {
     int ret = FUNCTION_FAILURE;
+    if(len > 0)
+    {
+        ret = syscall(__NR_munmap, addr, len);
+    }
     return ret;
 }
 
