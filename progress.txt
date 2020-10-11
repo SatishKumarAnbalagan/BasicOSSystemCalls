@@ -19,4 +19,5 @@
 18) Part 2 - Satish - close syscall wrapper function implementation
 19) Part 2 - Satish - lseek syscall wrapper function implementation
 20) Part 2 - Satish - mmap syscall wrapper function implementation
-21) Part 2 - 
+21) Part 2 - Satish - munmap syscall wrapper function implementation
+22) Part 2 -
