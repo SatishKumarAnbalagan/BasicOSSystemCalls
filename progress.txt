@@ -1,22 +1,22 @@
-1) Part 1 - Check/Look up into using the syscall functions in the main files.
-2) Part 1 - Initial design of functions - read, write, exit.
-3) Part 1 - Factoring out generic readline and print functions.
-4) Part 1 - Implemented read, write, exit, readline and print functions.
-5) Part 1 - Added quit logic for user input.
-6) Part 1 - Updated error, exit codes.
-7) Part 1 - code commenting.
-8) Part 1 - code error checks and clean up. 
-9) Part 1 - changes in read & readlines function design.
-10) Part 1 - changes in write & print function design.
-11) Part 1 - implementation for testing Part -1 section.
+1) Part 1 - Satish - Check/Look up into using the syscall functions in the main files.
+2) Part 1 - Satish - Initial design of functions - read, write, exit.
+3) Part 1 - Satish - Factoring out generic readline and print functions.
+4) Part 1 - Satish - Implemented read, write, exit, readline and print functions.
+5) Part 1 - Satish - Added quit logic for user input.
+6) Part 1 - Satish - Updated error, exit codes.
+7) Part 1 - Satish - code commenting.
+8) Part 1 - Satish - code error checks and clean up. 
+9) Part 1 - Satish - changes in read & readlines function design.
+10) Part 1 - Satish - changes in write & print function design.
+11) Part 1 - Chuhan - implementation for testing Part -1 section.
 
-12) Part 2 - discussed the program design for loading system calls.
-13) Part 2 - started to understand and work on loading executable file onto memory.
-14) Part 2 - syscalls and basic functions declarations
-15) Part 2 - copy of read, write, exit from part-1.calls
-16) Part 2 - copied and modified readline, print from part-1.c for do_readline, do_print functions
-17) Part 2 - open syscall wrapper function implementation
-18) Part 2 - close syscall wrapper function implementation
-19) Part 2 - lseek syscall wrapper function implementation
-20) Part 2 - mmap syscall wrapper function implementation
+12) Part 2 - Satish - discussed the program design for loading system calls.
+13) Part 2 - Satish - started to understand and work on loading executable file onto memory.
+14) Part 2 - Satish - syscalls and basic functions declarations
+15) Part 2 - Satish - copy of read, write, exit from part-1.calls
+16) Part 2 - Satish - copied and modified readline, print from part-1.c for do_readline, do_print functions
+17) Part 2 - Satish - open syscall wrapper function implementation
+18) Part 2 - Satish - close syscall wrapper function implementation
+19) Part 2 - Satish - lseek syscall wrapper function implementation
+20) Part 2 - Satish - mmap syscall wrapper function implementation
 21) Part 2 - 
