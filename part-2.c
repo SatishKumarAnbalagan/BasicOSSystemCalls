@@ -14,6 +14,11 @@
 #define STDERROR_FILE_DESCRIPTOR_NUMBER 2    // standard value for error file descriptor 
 #define MAX_BUFFER_SIZE 200    // maximum size to do read and write
 
+/* Open file mode flags definitions */
+#define O_RDONLY	00000000
+#define O_WRONLY	00000001
+#define O_RDWR		00000002
+
 /* Error code definitions */
 #define ERROR_NULL_POINTER (-1000)
 
@@ -118,6 +123,10 @@ void exit(int err)
 int open(char *path, int flags)
 {
     int ret = FUNCTION_FAILURE;
+    if(path != NULL)
+    {
+        ret = syscall(__NR_open, flags);
+    }
     return ret;
 }
 
