@@ -15,9 +15,26 @@
 #define MAX_BUFFER_SIZE    200    // maximum size to do read and write
 
 /* Open file mode flags definitions */
-#define O_RDONLY    00000000
-#define O_WRONLY    00000001
-#define O_RDWR      00000002
+#ifndef O_RDONLY
+    #define O_RDONLY    00000000
+#endif
+#ifndef O_WRONLY
+    #define O_WRONLY    00000001
+#endif
+#ifndef O_RDWR
+    #define O_RDWR      00000002
+#endif
+
+/* lseek file flags definitions */
+#ifndef SEEK_SET
+    #define SEEK_SET 0    /* set file offset to offset */
+#endif
+#ifndef SEEK_CUR
+    #define SEEK_CUR 1    /* set file offset to current plus offset */
+#endif
+#ifndef SEEK_END
+    #define SEEK_END 2    /* set file offset to EOF plus offset */
+#endif
 
 /* Error code definitions */
 #define ERROR_NULL_POINTER    (-1000)
@@ -148,6 +165,10 @@ int close(int fd)
 int lseek(int fd, int offset, int flag)
 {
     int ret = FUNCTION_FAILURE;
+    if(FD_VALID_CHECK(fd))
+    {
+        ret = syscall(__NR_lseek, fd, offset, flag);
+    }
     return ret; 
 }
 
@@ -233,5 +254,6 @@ void main(void)
     vector[2] = do_getarg;
 
     /* YOUR CODE HERE */
+    exit(0);
 }
 
