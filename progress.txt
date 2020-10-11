@@ -12,3 +12,8 @@
 
 12) Part 2 - discussed the program design for loading system calls.
 13) Part 2 - started to understand and work on loading executable file onto memory.
+14) Part 2 - syscalls and basic functions declarations
+15) Part 2 - copy of read, write, exit from part-1.calls
+16) Part 2 - copied and modified readline, print from part-1.c for do_readline, do_print functions
+17) Part 2 - open function implementation
+18) 
