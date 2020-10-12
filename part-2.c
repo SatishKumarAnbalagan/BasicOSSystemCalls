@@ -14,6 +14,7 @@
 #define STDERROR_FILE_DESCRIPTOR_NUMBER    2    // standard value for error file descriptor 
 #define MAX_BUFFER_SIZE    200    // maximum size to do read and write
 #define MAX_ARGUMENTS    10    // max number of input arguments 
+#define PAGE_SIZE    4096    // size of the virtual page
 
 /* Open file mode flags definitions */
 #ifndef O_RDONLY
@@ -54,7 +55,9 @@
 #define FD_VALID_CHECK(fd)    ((fd > STDERROR_FILE_DESCRIPTOR_NUMBER) && (fd <= FD_SOFTLIMIT))
 
 /* round A up to the next multiple of B */
-#define ROUND_UP(a,b) (((a+b-1)/b)*b)
+#define ROUND_UP(a,b)    (((a+b-1)/b)*b)
+
+#define LOAD_START_ADDR    0x80000000
 
 extern void *vector[];
 
@@ -62,7 +65,7 @@ extern void *vector[];
 /* Global variables */
 char *argv[MAX_ARGUMENTS];
 int argc;
-
+void (*func)();
 
 /* write these functions 
  */
@@ -155,7 +158,7 @@ int open(char *path, int flags)
     int ret = FUNCTION_FAILURE;
     if(path != NULL)
     {
-        ret = syscall(__NR_open, flags);
+        ret = syscall(__NR_open, path, flags);
     }
     // checks fd validity & returns file descriptor
     return FD_VALID_CHECK(ret) ? ret : FUNCTION_FAILURE;
@@ -184,7 +187,7 @@ int lseek(int fd, int offset, int flag)
 void *mmap(void *addr, int len, int prot, int flags, int fd, int offset)
 {
     void* ret = (void*) FUNCTION_FAILURE;
-    if((len > 0) && FD_VALID_CHECK(fd))
+    if((len > 0))
     {
         ret = (void*) syscall(__NR_mmap, addr, len, prot, flags, fd, offset); 
         if(ret == MAP_FAILED)
@@ -224,19 +227,20 @@ void do_readline(char *buf, int len)
     readline(buf, len);
 }
 
-int print(void *pInput)
+void print(char *buf)
 {
-    int ret = FUNCTION_FAILURE;
-    if (pInput != NULL) {
+    // int ret = FUNCTION_FAILURE;
+    if (buf != NULL) {
         // Read input characters until EOF and newline character is found.
-        ret = write(STDOUT_FILE_DESCRIPTOR_NUMBER, pInput, MAX_BUFFER_SIZE);
+        // ret = write(STDOUT_FILE_DESCRIPTOR_NUMBER, buf, MAX_BUFFER_SIZE);
+        write(STDOUT_FILE_DESCRIPTOR_NUMBER, buf, MAX_BUFFER_SIZE);
     }
-    return ret;
+    // return ret;
 }
 
 void do_print(char *buf)
 {
-    print((void *) buf);
+    print(buf);
 }
 
 char *do_getarg(int i)
@@ -271,6 +275,65 @@ int split(char **argv, int max_argc, char *line)
     return i;
 }
 
+int exec_file(char *filename)
+{
+    int ret = FUNCTION_FAILURE;
+    int fd;
+    
+    if ((fd = open(filename, O_RDONLY)) < 0) {
+        do_print("file open failed\n");
+        return ret;		/* failure code */
+    }
+
+    /* read the main header (offset 0) */
+    struct elf64_ehdr hdr;
+    read(fd, &hdr, sizeof(hdr));
+    
+    /* read program headers (offset 'hdr.e_phoff') */
+    int i, n = hdr.e_phnum;
+    struct elf64_phdr phdrs[n];
+    lseek(fd, hdr.e_phoff, SEEK_SET);
+    read(fd, phdrs, sizeof(phdrs));
+
+    void* addr_list[n];
+    int length[n];
+    int index = 0;
+    
+    /* look at each section in program headers */
+    for (i = 0; i < hdr.e_phnum; i++) {
+        if (phdrs[i].p_type == PT_LOAD) {
+	        int len = ROUND_UP(phdrs[i].p_memsz, PAGE_SIZE);
+            void *buf = mmap(phdrs[i].p_vaddr + LOAD_START_ADDR, len, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+            if(buf == MAP_FAILED) {
+                do_print("couldn't mmap\n");
+                exit(-1);
+            }
+            lseek(fd, (int)phdrs[i].p_offset, SEEK_SET);
+            read(fd, buf, (int)phdrs[i].p_filesz);
+            addr_list[index] = buf;
+            length[index] = (int)phdrs[i].p_filesz;
+            index++;
+	    }
+    }
+    
+    func = hdr.e_entry + LOAD_START_ADDR;
+    func();
+    --index;
+    while(index >= 0) {
+        int unmap_result = munmap((void *) addr_list[index], length[index]);
+        if (unmap_result != 0) {
+            do_print("Could not munmap");
+            exit(-1);
+        }
+        index--;
+    }
+
+    close(fd);
+
+    ret = FUNCTION_SUCCESS;
+    return ret;
+}
+
 void main(void)
 {
     vector[0] = do_readline;
@@ -285,7 +348,7 @@ void main(void)
 
     if(pInput != NULL) {    // NULL check, if in case malloc is used in future
         while(1) {
-            print("> ");
+            do_print("> ");
             readline(pInput, MAX_BUFFER_SIZE);
             int count = 0;
             int match = 1;
@@ -305,18 +368,16 @@ void main(void)
 
             argc = split(argv, MAX_ARGUMENTS, pInput);
 
-            print("you typed: ");
-
             int index = 0;
             while(index < argc)
             {
                 char *arg = do_getarg(index);
                 if(arg == NULL) {
-                    print("Invalid get arguments index. Exitt !!!\n");
+                    do_print("Invalid get arguments index. Exitt !!!\n");
                     exit(ERROR_INVALID_INDEX);
                 }
-                print(arg);
-                print("\n");
+                if(exec_file(arg))
+                    do_print("exec_file failed\n");
                 index++;
             }
         }
