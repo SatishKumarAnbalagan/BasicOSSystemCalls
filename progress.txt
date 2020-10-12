@@ -22,4 +22,6 @@
 21) Part 2 - Satish - munmap syscall wrapper function implementation
 22) Part 2 - Satish - initial argument parser
 23) Part 2 - Satish - load and run executable
-24) Part 2 -
+24) Part 2 - Satish - modification in load and run executable
+25) Part 2 - Chuhan - modification in load and run executable
+26) Part 2 - 
