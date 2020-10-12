@@ -21,4 +21,5 @@
 20) Part 2 - Satish - mmap syscall wrapper function implementation
 21) Part 2 - Satish - munmap syscall wrapper function implementation
 22) Part 2 - Satish - initial argument parser
-23) Part 2 -
+23) Part 2 - Satish - load and run executable
+24) Part 2 -
