@@ -24,4 +24,9 @@
 23) Part 2 - Satish - load and run executable
 24) Part 2 - Satish - modification in load and run executable
 25) Part 2 - Chuhan - modification in load and run executable
-26) Part 2 - 
+26) Part 2 - Satish - memory mapping offset; code commenting and indentation
+
+27) Part 3 - Satish - discussed the program design development and implementation
+28) Part 3 - Chuhan - discussed the program design development and implementation
+29) Part 3 - Satish - started understanding the switch_to and stack set up
+30) Part 3 -
