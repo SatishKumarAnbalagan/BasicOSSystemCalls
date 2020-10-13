@@ -169,6 +169,36 @@ void print(char *buf);
  */
 void do_print(char *buf);
 
+/*
+ * Function to switch from process 1 to process 2.
+ */
+void yield12(void);
+
+/*
+ * Utility function to switch from process 1 to process 2.
+ */
+void do_yield12(void);
+
+/*
+ * Function to switch from process 2 to process 1.
+ */
+void yield21(void);
+
+/*
+ * Utility function to switch from process 2 to process 1.
+ */
+void do_yield21(void);
+
+/*
+ * Function to switch back to the original process stack
+ */
+void uexit(void);
+
+/*
+ * Utility function to switch back to the original process stack
+ */
+void do_uexit(void);
+
 /* function definitions */
 
 int read(int fd, void *ptr, int len)
@@ -287,14 +317,35 @@ void do_print(char *buf)
     print(buf);
 }
 
-/* ---------- */
+void yield12(void)
+{
 
-/* write these new functions */
-void do_yield12(void);
-void do_yield21(void);
-void do_uexit(void);
+}
 
-/* ---------- */
+void do_yield12(void)
+{
+    yield12();
+}
+
+void yield21(void)
+{
+
+}
+
+void do_yield21(void)
+{
+    yield12();
+}
+
+void uexit(void)
+{
+
+}
+
+void do_uexit(void)
+{
+    uexit();
+}
 
 void main(void)
 {
