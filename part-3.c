@@ -335,6 +335,80 @@ void do_print(char *buf)
     print(buf);
 }
 
+void load_program(int fd, int offset, memory_t *mapped_addrs, int *loaded_len)
+{
+    /* Read the main header (offset 0) */
+    struct elf64_ehdr hdr;
+    lseek(fd, 0, SEEK_SET);
+    read(fd, &hdr, sizeof(hdr));
+    int total_len = hdr.e_phnum;
+
+    /* read program headers (offset 'hdr.e_phoff') */
+    struct elf64_phdr phdrs[total_len];
+    lseek(fd, hdr.e_phoff, SEEK_SET);
+    read(fd, phdrs, sizeof(phdrs));
+
+    void *start_addr = (void *)0x0 + offset;
+
+    int i;
+    for (i = 0; i < total_len; i++) {
+        if (phdrs[i].p_type == PT_LOAD) {
+            int mem_needed_sz = phdrs[i].p_memsz;
+            int mem_rounded_sz = ROUND_UP(mem_needed_sz, PAGE_SIZE);
+
+            void *buf = mmap(start_addr, mem_rounded_sz,
+                             PROT_READ | PROT_WRITE | PROT_EXEC,
+                             MAP_PRIVATE | MAP_ANONYMOUS, fd, 0);
+            if (buf == MAP_FAILED) {
+                do_print("mmap failed\n");
+                remove_mapping(mapped_addrs, *loaded_len);
+                exit(EXIT_FAILURE);
+            }
+
+            memory_t memory = {.addr = buf, .len = mem_rounded_sz};
+            mapped_addrs[*loaded_len] = memory;
+            (*loaded_len)++;
+            start_addr += mem_rounded_sz;
+
+            lseek(fd, (int)phdrs[i].p_offset, SEEK_SET);
+            read(fd, buf, mem_needed_sz);
+        }
+    }
+}
+
+void exec_program(void *entry, int offset) {
+    void (*f)();
+    f = entry + offset;
+    f();
+}
+
+void remove_mapping(memory_t *mapped_addrs, int mapped_len) {
+    int i;
+    for (i = 0; i < mapped_len; i++) {
+        memory_t mem = mapped_addrs[i];
+        munmap(mem.addr, mem.len);
+    }
+}
+
+void run_program(int fd) {
+    /* Get total entry numbers for mapped address allocation. */
+    struct elf64_ehdr hdr;
+    lseek(fd, 0, SEEK_SET);
+    read(fd, &hdr, sizeof(hdr));
+    int total_len = hdr.e_phnum;
+
+    /* Hold mmap mapped address for future removal. */
+    memory_t mapped_addrs[total_len];
+
+    int loaded_len = 0;
+
+    load_program(fd, M_OFFSET, mapped_addrs, &loaded_len);
+
+    exec_program(hdr.e_entry, M_OFFSET);
+
+    remove_mapping(mapped_addrs, loaded_len);
+}
+
 void yield12(void)
 {
 
@@ -372,8 +446,36 @@ void main(void)
     vector[3] = do_yield12;
     vector[4] = do_yield21;
     vector[5] = do_uexit;
+
+    char *pstack1 = &stack1[4096];
+    char *pstack2 = &stack2[4096];
+    int index = 0;
+    char *arg = do_getarg(index);
+
+    if (arg == NULL) {
+        do_print("Invalid get arguments index. Exit !!!\n");
+    }
+
+    int fd1 = open(arg, O_RDONLY);
+    if (fd1 < 0) {
+        do_print("Selected micro program doesn't exist\n");
+    }
     
-    
+    index = 1;
+    arg = do_getarg(index);
+
+    if (arg == NULL) {
+        do_print("Invalid get arguments index. Exit !!!\n");
+    }
+
+    int fd2 = open(arg, O_RDONLY);
+    if (fd2 < 0) {
+        do_print("Selected micro program doesn't exist\n");
+    }
+
+    void *setup_stack0(pstack1, void *func);
+    void switch_to(void **location_for_old_sp, void *new_value);
+
     do_print("done\n");
     exit(0);
 }
