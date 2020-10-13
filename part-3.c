@@ -56,10 +56,24 @@
 
 #define ROUND_UP(a,b)    (((a+b-1)/b)*b)    /* round A up to the next multiple of B */
 
+#define M_OFFSET    0x1000000    /* Micro program offset */
 
 extern void *vector[];
 extern void switch_to(void **location_for_old_sp, void *new_value);
 extern void *setup_stack0(void *_stack, void *func);
+
+/* Type definitions */
+
+typedef struct {    /* Struct to hold mmap mapped memory addresses */
+    void *addr;
+    int len;
+} memory_t;
+
+/* Global variables */
+
+char *argv[MAX_ARGC];    /* Global variable to store command arguments. */
+
+int argc;    /* Global variable to store maximum number of command arguments. */
 
 /* Function declarations*/
 
