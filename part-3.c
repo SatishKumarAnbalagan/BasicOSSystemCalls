@@ -275,8 +275,17 @@ int munmap(void *addr, int len)
     return ret;
 }
 
-/* copy from Part 2 */
-void do_print(char *buf);
+void print(char *buf)
+{
+    if (buf != NULL) {
+        write(STDOUT_FILE_DESCRIPTOR_NUMBER, buf, MAX_BUFFER_SIZE);
+    }
+}
+
+void do_print(char *buf)
+{
+    print(buf);
+}
 
 /* ---------- */
 
