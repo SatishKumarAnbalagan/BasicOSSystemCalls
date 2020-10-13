@@ -473,8 +473,8 @@ void main(void)
         do_print("Selected micro program doesn't exist\n");
     }
 
-    void *setup_stack0(pstack1, void *func);
-    void switch_to(void **location_for_old_sp, void *new_value);
+    //void *setup_stack0(pstack1, void *func);
+    //void switch_to(void **location_for_old_sp, void *new_value);
 
     do_print("done\n");
     exit(0);
