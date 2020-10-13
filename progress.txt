@@ -29,4 +29,6 @@
 27) Part 3 - Satish - discussed the program design development and implementation
 28) Part 3 - Chuhan - discussed the program design development and implementation
 29) Part 3 - Satish - started understanding the switch_to and stack set up
-30) Part 3 -
+30) Part 3 - Satish - system calls wrapper function declarations
+31) Part 3 - Satish - utility function declarations
+32) Part 3 - 

@@ -103,7 +103,23 @@ void *mmap(void *addr, int len, int prot, int flags, int fd, int offset);
  */
 int munmap(void *addr, int len);
 
-/* ---------- */
+// utility functions
+
+/*
+ * Function to write a buffer to stdout.
+ * 
+ * @param buf: pointer to the buffer in char
+ */
+void print(char *buf);
+
+/*
+ * Utility function to write a buffer to stdout.
+ * 
+ * @param buf: pointer to the buffer in char
+ */
+void do_print(char *buf);
+
+/* function definitions */
 
 /* copy from Part 2 */
 void do_print(char *buf);
