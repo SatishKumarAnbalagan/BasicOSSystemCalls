@@ -75,6 +75,10 @@ char *argv[MAX_ARGC];    /* Global variable to store command arguments. */
 
 int argc;    /* Global variable to store maximum number of command arguments. */
 
+char stack1[4096];    /* Process 1 stack */
+
+char stack2[4096];    /* Process 2 stack */
+
 /* Function declarations*/
 
 // System Call wrappers
@@ -369,8 +373,7 @@ void main(void)
     vector[4] = do_yield21;
     vector[5] = do_uexit;
     
-    /* your code here */
-
+    
     do_print("done\n");
     exit(0);
 }
