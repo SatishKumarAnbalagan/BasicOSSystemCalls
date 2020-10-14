@@ -418,13 +418,6 @@ pFunc get_entry_point(int fd, int offset)
     read(fd, &hdr, sizeof(hdr));
     int total_len = hdr.e_phnum;
 
-    /* Hold mmap mapped address for future removal. */
-    memory_t mapped_addrs[total_len];
-
-    int loaded_len = 0;
-
-    load_program(fd, M1_OFFSET);
-
     pFunc fptr = (pFunc)(hdr.e_entry + offset);
     return fptr;
 }
