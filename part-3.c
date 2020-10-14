@@ -412,11 +412,10 @@ void load_program(int fd, int offset)
 
 pFunc get_entry_point(int fd, int offset)
 {
-    /* Get total entry numbers for mapped address allocation. */
+    /* Get entry address for mapped address allocation. */
     struct elf64_ehdr hdr;
     lseek(fd, 0, SEEK_SET);
     read(fd, &hdr, sizeof(hdr));
-    int total_len = hdr.e_phnum;
 
     pFunc fptr = (pFunc)(hdr.e_entry + offset);
     return fptr;
@@ -424,7 +423,7 @@ pFunc get_entry_point(int fd, int offset)
 
 void yield12(void)
 {
-
+    switch_to(&pStack1, pStack2); 
 }
 
 void do_yield12(void)
@@ -434,7 +433,7 @@ void do_yield12(void)
 
 void yield21(void)
 {
-
+    switch_to(&pStack2, pStack1); 
 }
 
 void do_yield21(void)
@@ -444,7 +443,7 @@ void do_yield21(void)
 
 void uexit(void)
 {
-
+    switch_to(&pStack1, pMainStack); 
 }
 
 void do_uexit(void)
@@ -461,39 +460,45 @@ void main(void)
     vector[5] = do_uexit;
 
     int exit_code = EXIT_FAILURE;
+
     int index = 0;
+    int fd1, fd2;
+    pFunc fptr1, fptr2;
     char *arg = do_getarg(index);
 
     if (arg == NULL) {
-        do_print("Invalid get arguments index. Exit !!!\n");
+        do_print("Invalid get arguments value, index - 0. Exit !!!\n");
         exit(exit_code);
     }
 
-    int fd1 = open(arg, O_RDONLY);
+    fd1 = open(arg, O_RDONLY);
     if (fd1 < 0) {
-        do_print("Selected micro program doesn't exist\n");
+        do_print("Selected micro program process - 1 doesn't exist. Bye, exit !!!\n");
         exit(exit_code);
     }
-
-    load_program(fd1, M1_OFFSET);
-    pFunc fptr1 = get_entry_point(fd1, M1_OFFSET);
     
     index = 1;
     arg = do_getarg(index);
 
     if (arg == NULL) {
-        do_print("Invalid get arguments index. Exit !!!\n");
+        do_print("Invalid get arguments value, index - 1. Exit !!!\n");
+        exit(exit_code);
     }
 
-    int fd2 = open(arg, O_RDONLY);
+    fd2 = open(arg, O_RDONLY);
     if (fd2 < 0) {
-        do_print("Selected micro program doesn't exist\n");
+        do_print("Selected micro program process - 2 doesn't exist. Bye, exit !!!\n");
+        exit(exit_code);
     }
 
+    load_program(fd1, M1_OFFSET);
     load_program(fd2, M2_OFFSET);
-    pFunc fptr2 = get_entry_point(fd2, M2_OFFSET);
 
-    void *pStack1 = setup_stack0(pStack1 + PAGE_SIZE, fptr1);
+    fptr1 = get_entry_point(fd1, M1_OFFSET);
+    fptr2 = get_entry_point(fd2, M2_OFFSET);
+
+    pStack1 = setup_stack0(stack1 + STACK_SIZE, fptr1);
+    pStack2 = setup_stack0(stack2 + STACK_SIZE, fptr2);
     //void switch_to(void **location_for_old_sp, void *new_value);
 
     do_print("done\n");
@@ -501,5 +506,5 @@ void main(void)
     close(fd1);
     close(fd2);
 
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
