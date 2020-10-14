@@ -127,5 +127,5 @@ END_TEXT`
 unit_test4
 
 #remove output files
-rm $TEST_STDIN_FILE $TEST_STDOUT_FILE
+rm $TEST_OUTPUT_FILE $TEST_EXPECT_FILE
 
