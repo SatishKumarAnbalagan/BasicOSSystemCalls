@@ -59,7 +59,7 @@
 #define ROUND_UP(a,b)    (((a+b-1)/b)*b)    /* round A up to the next multiple of B */
 
 #define M1_OFFSET    0x1000000    /* Micro program - process 1 offset */
-#define M2_OFFSET    0x1000000    /* Micro program - process 2 offset */
+#define M2_OFFSET    0x2000000    /* Micro program - process 2 offset */
 
 extern void *vector[];
 extern void switch_to(void **location_for_old_sp, void *new_value);
@@ -67,10 +67,7 @@ extern void *setup_stack0(void *_stack, void *func);
 
 /* Type definitions */
 
-typedef struct {    /* Struct to hold mmap mapped memory addresses */
-    void *addr;
-    int len;
-} memory_t;
+typedef void (*pFunc)();    /* Function pointer type to micro-program entry point. */
 
 /* Global variables */
 
@@ -87,8 +84,6 @@ void *pMainStack;    /* Main process stack pointer */
 void *pStack1;    /* Process 1 stack pointer */
 
 void *pStack2;    /* Process 2 stack pointer */
-
-typedef void (*pFunc)();    /* Function pointer type to micro-program entry point. */
 
 /* Function declarations*/
 
