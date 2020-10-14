@@ -13,8 +13,10 @@
 #define STDOUT_FILE_DESCRIPTOR_NUMBER    1    /* standard value for output file descriptor */
 #define STDERROR_FILE_DESCRIPTOR_NUMBER    2    /* standard value for error file descriptor */
 #define MAX_BUFFER_SIZE    200    /* maximum size to do read and write */
-#define MAX_ARGC    10    /* max number of input arguments */
+#define MAX_ARGC    2    /* max number of input arguments */
 #define PAGE_SIZE    4096    /* size of the virtual page */
+#define STACK_SIZE    4096    /* size of the stack */
+
 
 /* Open file mode flags definitions */
 #ifndef O_RDONLY
@@ -56,7 +58,8 @@
 
 #define ROUND_UP(a,b)    (((a+b-1)/b)*b)    /* round A up to the next multiple of B */
 
-#define M_OFFSET    0x1000000    /* Micro program offset */
+#define M1_OFFSET    0x1000000    /* Micro program - process 1 offset */
+#define M2_OFFSET    0x1000000    /* Micro program - process 2 offset */
 
 extern void *vector[];
 extern void switch_to(void **location_for_old_sp, void *new_value);
@@ -71,13 +74,21 @@ typedef struct {    /* Struct to hold mmap mapped memory addresses */
 
 /* Global variables */
 
-char *argv[MAX_ARGC];    /* Global variable to store command arguments. */
+char *argv[MAX_ARGC] = {"process1", "process2"};    /* Global variable to store command arguments. */
 
-int argc;    /* Global variable to store maximum number of command arguments. */
+int argc = MAX_ARGC;    /* Global variable to store maximum number of command arguments. */
 
-char stack1[4096];    /* Process 1 stack */
+char stack1[STACK_SIZE];    /* Process 1 stack */
 
-char stack2[4096];    /* Process 2 stack */
+char stack2[STACK_SIZE];    /* Process 2 stack */
+
+void *pMainStack;    /* Main process stack pointer */
+
+void *pStack1;    /* Process 1 stack pointer */
+
+void *pStack2;    /* Process 2 stack pointer */
+
+typedef void (*pFunc)();    /* Function pointer type to micro-program entry point. */
 
 /* Function declarations*/
 
@@ -174,6 +185,14 @@ int munmap(void *addr, int len);
 // utility functions
 
 /*
+ * Utility function to get an input arguement at position i.
+ * 
+ * @param i: position of argument in int
+ * @return argument's char pointer at position i
+ */
+char *do_getarg(int i); 
+
+/*
  * Function to write a buffer to stdout.
  * 
  * @param buf: pointer to the buffer in char
@@ -216,6 +235,23 @@ void uexit(void);
  * Utility function to switch back to the original process stack
  */
 void do_uexit(void);
+
+/*
+ * Function to load a micro-program and map it to a memory.
+ * 
+ * @param fd: file descriptor of the program in int
+ * @param offset: micro-program memory offset in int
+ */
+void load_program(int fd, int offset);
+
+/*
+ * Function to load micro-program and get the mapped memory.
+ * 
+ * @param fd: file descriptor of the program in int
+ * @param offset: micro-program memory offset in int
+ * @return the function pointer to the micro-program
+ */
+pFunc get_entry_point(int fd, int offset);
 
 /* function definitions */
 
@@ -268,8 +304,7 @@ void exit(int err)
 int open(char *path, int flags)
 {
     int ret = FUNCTION_FAILURE;
-    if (path != NULL)
-    {
+    if (path != NULL) {
         ret = syscall(__NR_open, path, flags);
     }
     // checks fd validity & returns file descriptor
@@ -279,8 +314,7 @@ int open(char *path, int flags)
 int close(int fd)
 {
     int ret = FUNCTION_FAILURE;
-    if (FD_VALID_CHECK(fd))
-    {
+    if (FD_VALID_CHECK(fd)) {
         ret = syscall(__NR_close, fd);
     }
     return ret;
@@ -289,8 +323,7 @@ int close(int fd)
 int lseek(int fd, int offset, int flag)
 {
     int ret = FUNCTION_FAILURE;
-    if (FD_VALID_CHECK(fd))
-    {
+    if (FD_VALID_CHECK(fd)) {
         ret = syscall(__NR_lseek, fd, offset, flag);
     }
     return ret; 
@@ -299,16 +332,13 @@ int lseek(int fd, int offset, int flag)
 void *mmap(void *addr, int len, int prot, int flags, int fd, int offset)
 {
     void* ret = (void*) FUNCTION_FAILURE;
-    if ((len > 0))
-    {
+    if ((len > 0)) {
         ret = (void*) syscall(__NR_mmap, addr, len, prot, flags, fd, offset); 
-        if (ret == MAP_FAILED)
-        {
+        if (ret == MAP_FAILED) {
             do_print("Mapping Failed\n");
         }
     }
-    else
-    {
+    else {
         do_print("mmap input error\n");
     }
     return ret;
@@ -323,6 +353,14 @@ int munmap(void *addr, int len)
     return ret;
 }
 
+char *do_getarg(int i)
+{
+    if (i < argc)
+        return argv[i];
+    else
+        return NULL;
+}
+
 void print(char *buf)
 {
     if (buf != NULL) {
@@ -335,7 +373,7 @@ void do_print(char *buf)
     print(buf);
 }
 
-void load_program(int fd, int offset, memory_t *mapped_addrs, int *loaded_len)
+void load_program(int fd, int offset)
 {
     /* Read the main header (offset 0) */
     struct elf64_ehdr hdr;
@@ -361,13 +399,9 @@ void load_program(int fd, int offset, memory_t *mapped_addrs, int *loaded_len)
                              MAP_PRIVATE | MAP_ANONYMOUS, fd, 0);
             if (buf == MAP_FAILED) {
                 do_print("mmap failed\n");
-                remove_mapping(mapped_addrs, *loaded_len);
                 exit(EXIT_FAILURE);
             }
-
-            memory_t memory = {.addr = buf, .len = mem_rounded_sz};
-            mapped_addrs[*loaded_len] = memory;
-            (*loaded_len)++;
+            
             start_addr += mem_rounded_sz;
 
             lseek(fd, (int)phdrs[i].p_offset, SEEK_SET);
@@ -376,21 +410,8 @@ void load_program(int fd, int offset, memory_t *mapped_addrs, int *loaded_len)
     }
 }
 
-void exec_program(void *entry, int offset) {
-    void (*f)();
-    f = entry + offset;
-    f();
-}
-
-void remove_mapping(memory_t *mapped_addrs, int mapped_len) {
-    int i;
-    for (i = 0; i < mapped_len; i++) {
-        memory_t mem = mapped_addrs[i];
-        munmap(mem.addr, mem.len);
-    }
-}
-
-void run_program(int fd) {
+pFunc get_entry_point(int fd, int offset)
+{
     /* Get total entry numbers for mapped address allocation. */
     struct elf64_ehdr hdr;
     lseek(fd, 0, SEEK_SET);
@@ -402,11 +423,10 @@ void run_program(int fd) {
 
     int loaded_len = 0;
 
-    load_program(fd, M_OFFSET, mapped_addrs, &loaded_len);
+    load_program(fd, M1_OFFSET);
 
-    exec_program(hdr.e_entry, M_OFFSET);
-
-    remove_mapping(mapped_addrs, loaded_len);
+    pFunc fptr = (pFunc)(hdr.e_entry + offset);
+    return fptr;
 }
 
 void yield12(void)
@@ -447,19 +467,23 @@ void main(void)
     vector[4] = do_yield21;
     vector[5] = do_uexit;
 
-    char *pstack1 = &stack1[4096];
-    char *pstack2 = &stack2[4096];
+    int exit_code = EXIT_FAILURE;
     int index = 0;
     char *arg = do_getarg(index);
 
     if (arg == NULL) {
         do_print("Invalid get arguments index. Exit !!!\n");
+        exit(exit_code);
     }
 
     int fd1 = open(arg, O_RDONLY);
     if (fd1 < 0) {
         do_print("Selected micro program doesn't exist\n");
+        exit(exit_code);
     }
+
+    load_program(fd1, M1_OFFSET);
+    pFunc fptr1 = get_entry_point(fd1, M1_OFFSET);
     
     index = 1;
     arg = do_getarg(index);
@@ -473,9 +497,16 @@ void main(void)
         do_print("Selected micro program doesn't exist\n");
     }
 
-    //void *setup_stack0(pstack1, void *func);
+    load_program(fd2, M2_OFFSET);
+    pFunc fptr2 = get_entry_point(fd2, M2_OFFSET);
+
+    void *pStack1 = setup_stack0(pStack1 + PAGE_SIZE, fptr1);
     //void switch_to(void **location_for_old_sp, void *new_value);
 
     do_print("done\n");
+
+    close(fd1);
+    close(fd2);
+
     exit(0);
 }
