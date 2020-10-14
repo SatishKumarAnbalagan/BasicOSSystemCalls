@@ -433,7 +433,7 @@ void yield21(void)
 
 void do_yield21(void)
 {
-    yield12();
+    yield21();
 }
 
 void uexit(void)
