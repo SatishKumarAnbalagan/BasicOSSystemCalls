@@ -460,12 +460,11 @@ void main(void)
     vector[5] = do_uexit;
 
     int exit_code = EXIT_FAILURE;
-
     int index = 0;
     int fd1, fd2;
     pFunc fptr1, fptr2;
-    char *arg = do_getarg(index);
 
+    char *arg = do_getarg(index);
     if (arg == NULL) {
         do_print("Invalid get arguments value, index - 0. Exit !!!\n");
         exit(exit_code);
@@ -479,7 +478,6 @@ void main(void)
     
     index = 1;
     arg = do_getarg(index);
-
     if (arg == NULL) {
         do_print("Invalid get arguments value, index - 1. Exit !!!\n");
         exit(exit_code);
@@ -499,12 +497,15 @@ void main(void)
 
     pStack1 = setup_stack0(stack1 + STACK_SIZE, fptr1);
     pStack2 = setup_stack0(stack2 + STACK_SIZE, fptr2);
-    //void switch_to(void **location_for_old_sp, void *new_value);
+
+    switch_to(&pMainStack, pStack1);
 
     do_print("done\n");
 
     close(fd1);
     close(fd2);
 
-    exit(EXIT_SUCCESS);
+    exit_code = EXIT_SUCCESS;
+
+    exit(exit_code);
 }
