@@ -1,10 +1,10 @@
 #!/bin/bash
 
-make clean
-make part-2
-
+count=$1
 TEST_EXPECT_FILE="testExpect.out"
 TEST_OUTPUT_FILE="testOut.out"
+
+mkfifo part-2.pipe
 NEW_LINE="\n"
 
 read -r -d '' TEST1 << EOM
@@ -49,83 +49,68 @@ $TEST2EXPECT
 $TEST3EXPECT
 EOM
 
-
 compare_file() {
+    printf "Output:\n\n"
+    cat < $TEST_OUTPUT_FILE
 	if cmp  $TEST_EXPECT_FILE $TEST_OUTPUT_FILE;
 	then
-		printf "success!\n\n"
+		printf "\n\nSUCCESS !\n\n"
 	else 
-		printf "fail!\n\n"
+        printf "\n\nFAIL !\n\nExpected result:\n\n"
+        cat < $TEST_EXPECT_FILE
+        printf "\n\nPart -3 test failed. Exit !\n"
+        exit 1
 	fi
 }
 
 
 unit_test1() {
-	printf "Test1 StdInput:\n "
-	echo "$TEST1"
-	out=`./part-2 << END_TEXT
-$TEST1
-quit
-END_TEXT`
-    echo "expected output:"
-	echo "$TEST1EXPECT"
-	echo "$out"  | sed -r 's/^> //; $d' > $TEST_OUTPUT_FILE
+	echo "$TEST1" >> part-2.pipe | sed -r 's/^> //; $d' > $TEST_OUTPUT_FILE
 	printf "$TEST1EXPECT" > $TEST_EXPECT_FILE
 	compare_file
 }
 
-unit_test1 
-
 unit_test2() {
-	printf "Test2 StdInput:\n "
-	echo "$TEST2"
-	out=`./part-2 << END_TEXT
-$TEST2
-quit
-END_TEXT`
-    echo "expected output:"
-	echo "$TEST2EXPECT"
-	echo "$out"  | sed -r 's/^> //; $d' > $TEST_OUTPUT_FILE
-	echo "$TEST2EXPECT" > $TEST_EXPECT_FILE
+	#echo "$TEST2" >> part-2.pipe | sed -r 's/^> //; $d' > $TEST_OUTPUT_FILE
+	echo "$TEST2" >> part-2.pipe
+	read >&1 | sed -r 's/^> //; $d' > $TEST_OUTPUT_FILE 
+	printf "$TEST2EXPECT" > $TEST_EXPECT_FILE
 	compare_file
 }
 
-unit_test2
-
 unit_test3() {
-	printf "Test3 StdInput:\n "
-	echo "$TEST3"
-	out=`./part-2 << END_TEXT
-$TEST3
-
-quit
-END_TEXT`
-    echo "expected output:"
-	echo "$TEST3EXPECT"
-	echo "$out"  | sed -r 's/^> //; $d' > $TEST_OUTPUT_FILE
+	echo "$TEST3" >> part-2.pipe | sed -r 's/^> //; $d' > $TEST_OUTPUT_FILE
 	echo "$TEST3EXPECT" > $TEST_EXPECT_FILE
 	compare_file
 }
 
-unit_test3
-
 unit_test4() {
-	printf "Test4 StdInput:\n "
-	echo "$TEST4"
-	out=`./part-2 << END_TEXT
-$TEST4
-
-quit
-END_TEXT`
-    echo "expected output:"
-	echo "$TEST4EXPECT"
-	echo "$out"  | sed -r 's/^> //; $d' > $TEST_OUTPUT_FILE
+	echo "$TEST4" >> part-2.pipe | sed -r 's/^> //; $d' > $TEST_OUTPUT_FILE
 	echo "$TEST4EXPECT" > $TEST_EXPECT_FILE
 	compare_file
 }
 
-unit_test4
+part2test() {
+    x=0
+    printf "Part -2 test run - $count times:\n"
+	./part-2 < part-2.pipe &
+	sleep infinity > part-2.pipe &
+    while [ $x -le $count ]
+    do 
+		#unit_test1
+		unit_test2
+		#unit_test3
+		#unit_test4
+
+		x=$(( $x + 1 ))
+    done
+	#echo "hello" >> part-2.pipe | sed -r 's/^> //; $d' > $TEST_OUTPUT_FILE
+
+	echo "quit" >> part-2.pipe
+	rm part-2.pipe
+}
+
+part2test
 
 #remove output files
 rm $TEST_OUTPUT_FILE $TEST_EXPECT_FILE
-
