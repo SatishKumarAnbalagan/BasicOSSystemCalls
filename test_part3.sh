@@ -23,19 +23,21 @@ done
 EOM
 
 compare_file() {
-    cat < $TEST_EXPECT_FILE
+    printf "Output:\n\n"
+    cat < $TEST_OUTPUT_FILE
 	if cmp  $TEST_EXPECT_FILE $TEST_OUTPUT_FILE;
 	then
 		printf "\n\nSUCCESS !\n\n"
-        COMP_RESULT=1
 	else 
-		printf "\n\nFAIL !\n\n"
-        COMP_RESULT=0
+        printf "\n\nFAIL !\n\nExpected result:\n\n"
+        cat < $TEST_EXPECT_FILE
+        printf "\n\nPart -3 test failed. Exit !\n"
+        exit 1
 	fi
 }
 
 unit_test1() {
-	printf "unit test-1\n\n"
+	printf "unit test-1\n"
 	out=$(./part-3)
     printf "$out" > $TEST_OUTPUT_FILE
 	printf "$TEST1EXPECT" > $TEST_EXPECT_FILE
@@ -49,11 +51,6 @@ part3test() {
     do 
         printf "\ncount $x: "
         unit_test1
-        if [ $COMP_RESULT == 0 ]; then
-            echo "Part -3 test failed at $x run"
-            COMP_RESULT=0
-            break;
-        fi
 
 		x=$(( $x + 1 ))
     done
