@@ -10,20 +10,20 @@ if [ -z "$1" ]
 fi
 
 mainTest() {
+  x=0
+  while [ $x -le $count ]
+  do
+    printf "Count $x - Start part-1 test script:\n\n "
+    ./test_part1.sh
 
-    printf "Start part-1 test script:\n\n "
-    ./test_part1.sh $count
+    printf "Count $x - Start part-2 test script:\n\n "
+    ./test_part2.sh
 
-    printf "Start part-2 test script:\n\n "
-    ./test_part2.sh $count
-
-    printf "Start part-3 test script:\n\n "
-    ./test_part3.sh $count
+    printf "Count $x - Start part-3 test script:\n\n "
+    ./test_part3.sh
+  	
+    x=$(( $x + 1 ))
+  done
 }
-
-make clean
-make part-1
-make part-2
-make part-3
 
 mainTest
