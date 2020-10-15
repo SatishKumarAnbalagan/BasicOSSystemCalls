@@ -36,4 +36,9 @@
 34) Part 3 - Satish - yield functions implementation
 35) Part 3 - Chuhan - switch back to main process
 
-36) Testing script - 
+36) Testing script - Satish, Chuhan - discussed testing approaches
+37) Testing script - Satish, Chuhan - developed part 1, 2, 3 test scripts
+38) Testing script - Satish, Chuhan - designed fifo pipe to load exe once and test with different inputs
+39) Testing script - Satish - developed main test script with loop count input
+
+40) Project - Satish, Chuhan - Finished the project
