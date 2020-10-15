@@ -4,7 +4,8 @@ count=$1
 TEST_EXPECT_FILE="testExpect.out"
 TEST_OUTPUT_FILE="testOut.out"
 
-mkfifo part-2.pipe
+mkfifo part-2.pipe -m777
+
 NEW_LINE="\n"
 
 read -r -d '' TEST1 << EOM
@@ -59,6 +60,8 @@ compare_file() {
         printf "\n\nFAIL !\n\nExpected result:\n\n"
         cat < $TEST_EXPECT_FILE
         printf "\n\nPart -3 test failed. Exit !\n"
+		echo "quit" >> part-2.pipe
+	    rm part-2.pipe
         exit 1
 	fi
 }
@@ -71,10 +74,8 @@ unit_test1() {
 }
 
 unit_test2() {
-	#echo "$TEST2" >> part-2.pipe | sed -r 's/^> //; $d' > $TEST_OUTPUT_FILE
-	echo "$TEST2" >> part-2.pipe
-	read >&1 | sed -r 's/^> //; $d' > $TEST_OUTPUT_FILE 
-	printf "$TEST2EXPECT" > $TEST_EXPECT_FILE
+	echo "$TEST2" >> part-2.pipe | sed -r 's/^> //; $d' > $TEST_OUTPUT_FILE
+	echo "$TEST2EXPECT" > $TEST_EXPECT_FILE
 	compare_file
 }
 
