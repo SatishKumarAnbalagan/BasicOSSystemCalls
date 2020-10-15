@@ -34,7 +34,6 @@ compare_file() {
 	fi
 }
 
-
 unit_test1() {
 	printf "unit test-1\n\n"
 	out=$(./part-3)
