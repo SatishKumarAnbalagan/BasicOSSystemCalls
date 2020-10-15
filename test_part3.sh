@@ -1,16 +1,14 @@
 #!/bin/bash
 
-make clean
-make part-3
+count=$1
+if [ -z "$1" ]
+  then
+    count=10
+fi
 
 TEST_EXPECT_FILE="testExpect.out"
 TEST_OUTPUT_FILE="testOut.out"
-
-
-
-read -r -d '' TEST1 << EOM
-hello
-EOM
+COMP_RESULT=0
 
 read -r -d '' TEST1EXPECT << EOM
 program 1
@@ -24,66 +22,45 @@ program 2
 done
 EOM
 
-
-read -r -d '' TEST3 << EOM
-ugrep abc
-abcd
-cba
-EOM
-
-read -r -d '' TEST3EXPECT << EOM
-ugrep: enter blank line to quit
--- abcd
-EOM
-
-COMP_RESULT=0
-
 compare_file() {
+    cat < $TEST_EXPECT_FILE
 	if cmp  $TEST_EXPECT_FILE $TEST_OUTPUT_FILE;
 	then
-		printf "success!\n\n"
+		printf "\n\nSUCCESS !\n\n"
         COMP_RESULT=1
 	else 
-		printf "fail!\n\n"
+		printf "\n\nFAIL !\n\n"
+        COMP_RESULT=0
 	fi
 }
 
 
 unit_test1() {
-	printf "Test1 Run program 1 time:\n "
+	printf "unit test-1\n\n"
 	out=$(./part-3)
-    echo "expected output:"
-	echo "$TEST1EXPECT"
-	printf "$out" > $TEST_OUTPUT_FILE
+    printf "$out" > $TEST_OUTPUT_FILE
 	printf "$TEST1EXPECT" > $TEST_EXPECT_FILE
 	compare_file
 }
 
-unit_test1 
-
-unit_test2() {
-    end=10;
-	printf "Test2 Run program $end times:\n "
-    for i in $(seq 1 $end);
-        do echo "Run number: $i";
-    	out=$(./part-3)
-        echo "expected output:"
-        echo "$TEST1EXPECT"
-        printf "$out" > $TEST_OUTPUT_FILE
-        printf "$TEST1EXPECT" > $TEST_EXPECT_FILE
-        compare_file
+part3test() {
+    x=0
+    printf "Part -3 test run - $count times:\n "
+    while [ $x -le $count ]
+    do 
+        printf "\ncount $x: "
+        unit_test1
         if [ $COMP_RESULT == 0 ]; then
-            echo "Test failed at Run number $i"
+            echo "Part -3 test failed at $x run"
             COMP_RESULT=0
             break;
         fi
 
-    done;
+		x=$(( $x + 1 ))
+    done
 }
 
-unit_test2
-
+part3test
 
 #remove output files
 rm $TEST_EXPECT_FILE $TEST_OUTPUT_FILE
-
